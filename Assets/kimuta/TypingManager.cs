@@ -24,10 +24,7 @@ public class TypingManager : MonoBehaviour
 
     [Header("StartScene")]
     [SerializeField] UIImageBase startUI;
-    [SerializeField] UIImageBase ui3;
-    [SerializeField] UIImageBase ui2;
-    [SerializeField] UIImageBase ui1;
-    [SerializeField] UIImageBase uiStart;
+    [SerializeField] UIImageBase siro;
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -193,6 +190,8 @@ public class TypingManager : MonoBehaviour
         typeCount += 1;
         NextKey();
         MoveUI();
+
+        Time_Image_Change.instance.typing_pc;
     }
 
     void FailType() //　間違い
@@ -261,6 +260,12 @@ public class TypingManager : MonoBehaviour
     {
         isCanType = false;
         isTimer = false;
+        siro.FadeInImage(0.5f);
+        Invoke("owari", 0.5f);
+    }
+
+    void owari()
+    {
         GameManager.gameManager.TypingResult(typeCount);
     }
 }
