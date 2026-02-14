@@ -23,17 +23,15 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        gameManager = this;
-    }
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
+        if (gameManager == null)
+        {
+            gameManager = this;
+            DontDestroyOnLoad(transform.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     //　Typing　/////////////////////////////////////////////////////////
