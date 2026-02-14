@@ -8,6 +8,8 @@ public class Time_Image_Change : MonoBehaviour
     [SerializeField] GameObject background;
     [SerializeField] GameObject clock;
 
+    [SerializeField] GameObject[] pc_image;
+
     private int maxTypingTime;
 
     private float ratio;
@@ -15,6 +17,9 @@ public class Time_Image_Change : MonoBehaviour
     private float Bground_rot;
 
     private int nature;
+
+
+    private int pc_int;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -29,6 +34,7 @@ public class Time_Image_Change : MonoBehaviour
             Destroy(gameObject);
         }
          nature = 0;
+        pc_int = 0;
     }
 
     public void Timeset(float time)
@@ -59,5 +65,17 @@ public class Time_Image_Change : MonoBehaviour
         }
     }
 
-    
+    public void typing_pc()
+    {
+        foreach (GameObject pc in pc_image)
+        {
+            pc.SetActive(false);
+        }
+        pc_image[pc_int].SetActive(true);
+        pc_int++;
+        if (pc_image.Length < pc_int)
+        {
+            pc_int = 0;
+        }
+    }
 }
