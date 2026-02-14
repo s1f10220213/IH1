@@ -262,5 +262,6 @@ public class TypingManager : MonoBehaviour
     {
         isCanType = false;
         isTimer = false;
+        GameManager.gameManager.TypingResult(typeCount);
     }
 }

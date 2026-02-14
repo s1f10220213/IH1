@@ -1028,7 +1028,7 @@ MonoBehaviour:
   typingTime: 0
   maxScore: 100
   maxScoreTypeCount: 100
-  maxTypingTime: 100
+  maxTypingTime: 13
   gameOverMissCount: 100
   spriteW: {fileID: 21300000, guid: 34f5ecc6c7b7c844295d4fecbd6a2303, type: 3}
   spriteA: {fileID: 21300000, guid: cb449dc32f459d8418a0f30c71c2f20d, type: 3}

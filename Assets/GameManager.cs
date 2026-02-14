@@ -36,9 +36,9 @@ public class GameManager : MonoBehaviour
 
     //　Typing　/////////////////////////////////////////////////////////
 
-    public void TypingResult()
+    public void TypingResult(float type)
     {
-
+        score = type * 3;
     }
 
 
