@@ -43,8 +43,8 @@ public class Time_Image_Change : MonoBehaviour
 
         ratio = time / maxTypingTime;
         
-        clock_rot = 390 / ratio;
-        Bground_rot = 190 / ratio;
+        clock_rot = 390 * ratio;
+        Bground_rot = 190 * ratio;
 
         clock.transform.rotation = Quaternion.Euler(0f, 0f, (-150f - clock_rot));
         background.transform.rotation = Quaternion.Euler(0f, 0f, (320f+Bground_rot));

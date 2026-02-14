@@ -54,6 +54,7 @@ public class TypingManager : MonoBehaviour
     private IEnumerator GameStart()
     {
         float time = 0;
+        startUI.BlinkImageStop(false);
         startUI.FadeOutImage(0.3f);
         
         for (int i=0; i<6; i++)
