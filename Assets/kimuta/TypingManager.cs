@@ -48,6 +48,7 @@ public class TypingManager : MonoBehaviour
         {
             ui.SetAlpha(0);
         }
+        Time_Image_Change.instance.Timeset(maxTypingTime);
     }
     
     private IEnumerator GameStart()
@@ -152,6 +153,7 @@ public class TypingManager : MonoBehaviour
         if (isTimer)
         {
             typingTime += Time.deltaTime;
+            Time_Image_Change.instance.Clock_Bground_rot(typingTime);
 
             if (typingTime >= maxTypingTime)
             {

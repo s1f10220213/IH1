@@ -31,9 +31,9 @@ public class Time_Image_Change : MonoBehaviour
          nature = 0;
     }
 
-    public void Timeset(int time)
+    public void Timeset(float time)
     {
-        maxTypingTime = time;
+        maxTypingTime = (int)time;
     }
 
     public void Clock_Bground_rot(float time)
