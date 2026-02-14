@@ -15,6 +15,11 @@ public class GameManager : MonoBehaviour
 
     [Header("Score")]
     [SerializeField] float score;
+    public float Score
+    {
+        get { return score; }
+        set { score = value; }
+    }
 
     void Awake()
     {
