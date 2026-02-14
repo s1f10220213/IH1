@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TypingManager : MonoBehaviour
 {
@@ -21,10 +23,18 @@ public class TypingManager : MonoBehaviour
     [SerializeField] Sprite spriteS;
     [SerializeField] Sprite spriteD;
 
+    [Header("StartScene")]
+    [SerializeField] UIImageBase startUI;
+    [SerializeField] UIImageBase ui3;
+    [SerializeField] UIImageBase ui2;
+    [SerializeField] UIImageBase ui1;
+    [SerializeField] UIImageBase uiStart;
+
     ////////////////////////////////////////////////////////////////////////////
 
     private bool isCanType;
     private bool isTimer;
+    private bool isStart;
     [SerializeField] private int[] keyCodes = new int[5];
     private UIImageBase[] images = new UIImageBase[6];
     private int currentKeyCode;
@@ -35,6 +45,17 @@ public class TypingManager : MonoBehaviour
 
     void Start()
     {
+        foreach(UIImageBase ui in images)
+        {
+            ui.SetAlpha(0);
+        }
+    }
+    
+    private IEnumerator GameStart()
+    {
+        float time = 0;
+        startUI.FadeOutImage(0.3f);
+        
         for (int i=0; i<5; i++)
         {
            keyCodes[i] = Random.Range(0, 4);
@@ -43,6 +64,13 @@ public class TypingManager : MonoBehaviour
 
         currentImage = 0;
         SetUI();
+        
+        foreach (UIImageBase ui in images)
+        {
+            ui.FadeInImage(0.35f);
+        }
+
+        yield return new WaitForSeconds(3);
         TypingStart();
     }
 
@@ -78,11 +106,11 @@ public class TypingManager : MonoBehaviour
                 images[i].MoveDirection(-Vector2.up, 500, 0.04f, UIImageBase.EasingType.EaseOut);
                 //images[i].ScaleToScaleImage(, 0.04);
             }
-            else if (i == (currentImage+1)%7) //　右からスライドイン
+            else if (i == (currentImage+1)%6) //　右からスライドイン
             {
                 //images[i].MoveFromTo();
             }
-            else if (i == (currentImage+6)%7) //　右へ一つ・拡大
+            else if (i == (currentImage+5)%6) //　右へ一つ・拡大
             {
                 images[i].MoveDirection(-Vector2.right, 50, 0.04f, UIImageBase.EasingType.EaseOut);
                 //images[i].ScaleToScaleImage(, 0.04);
@@ -93,11 +121,27 @@ public class TypingManager : MonoBehaviour
             }
         }
         currentImage += 1;
-        currentImage %= 7;
+        currentImage %= 6;
     }
+
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     void Update()
     {
+        if (!isStart)
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard.anyKey.wasPressedThisFrame)
+            {
+                foreach (var key in keyboard.allKeys)
+                {
+                    if(key.wasPressedThisFrame && key.displayName == "Enter")
+                    {
+                        StartCoroutine(GameStart());
+                    }
+                }
+            }
+        }
         if (isTimer)
         {
             typingTime += Time.deltaTime;
@@ -110,34 +154,38 @@ public class TypingManager : MonoBehaviour
 
         if (isCanType)
         {
-            if (Input.GetKeyDown(enterKey))
+            var keyboard = Keyboard.current;
+            if (keyboard.anyKey.wasPressedThisFrame)
             {
-                if (key.wasPressedThisFrame && key.displayName == "W")
+                foreach (var key in keyboard.allKeys)
                 {
-                    InputW();
-                }
-                else if(key.wasPressedThisFrame && key.displayName == "A")
-                {
-                    InputA();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "S")
-                {
-                    InputS();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "D")
-                {
-                    InputD();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "Enter")
-                {
-                    InputEnter();
+                    if (key.wasPressedThisFrame && key.displayName == "W")
+                    {
+                        JudgeKey(0);
+                    }
+                    else if(key.wasPressedThisFrame && key.displayName == "A")
+                    {
+                        JudgeKey(1);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "S")
+                    {
+                        JudgeKey(2);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "D")
+                    {
+                        JudgeKey(3);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "Enter")
+                    {
+                        TypingStop();
+                    }
                 }
             }
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////
-     
+        
     void JudgeKey(int keyID) //　キーの正誤判定
     {
         if (currentKeyCode == keyID)
@@ -179,6 +227,22 @@ public class TypingManager : MonoBehaviour
     void GenerateNextKey()
     {
         keyCodes[4] = Random.Range(0, 4);
+        if (keyCodes[4] == 0)
+        {
+            images[(currentKeyCode+5)%6].SetSprite(spriteW);
+        }
+        else if (keyCodes[4] == 1)
+        {
+            images[(currentKeyCode+5)%6].SetSprite(spriteA);
+        }
+        else if (keyCodes[4] == 2)
+        {
+            images[(currentKeyCode+5)%6].SetSprite(spriteS);
+        }
+        else if (keyCodes[4] == 3)
+        {
+            images[(currentKeyCode+5)%6].SetSprite(spriteD);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////

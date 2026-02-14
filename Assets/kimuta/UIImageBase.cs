@@ -75,6 +75,11 @@ public class UIImageBase : MonoBehaviour
         image.color = imageColor;
     }
 
+    public void SetAlpha(float alpha)
+    {
+        image.color = new Color(imageColor.r, imageColor.r, imageColor.b, alpha);
+    }
+
     public void SetSprite(Sprite s)
     {
         image.sprite = s;
