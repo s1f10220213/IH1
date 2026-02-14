@@ -191,7 +191,7 @@ public class TypingManager : MonoBehaviour
         NextKey();
         MoveUI();
 
-        Time_Image_Change.instance.typing_pc;
+        Time_Image_Change.instance.typing_pc();
     }
 
     void FailType() //　間違い

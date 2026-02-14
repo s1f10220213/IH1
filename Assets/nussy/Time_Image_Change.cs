@@ -73,7 +73,7 @@ public class Time_Image_Change : MonoBehaviour
         }
         pc_image[pc_int].SetActive(true);
         pc_int++;
-        if (pc_image.Length < pc_int)
+        if (pc_image.Length <= pc_int)
         {
             pc_int = 0;
         }
