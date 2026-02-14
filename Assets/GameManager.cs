@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,27 +15,31 @@ public class GameManager : MonoBehaviour
 
     [Header("Score")]
     [SerializeField] float score;
+    public float Score
+    {
+        get { return score; }
+        set { score = value; }
+    }
 
     void Awake()
     {
-        gameManager = this;
-    }
-
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
+        if (gameManager == null)
+        {
+            gameManager = this;
+            DontDestroyOnLoad(transform.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     //　Typing　/////////////////////////////////////////////////////////
 
-    public void TypingResult()
+    public void TypingResult(float type)
     {
-
+        score = type * 3;
+        SceneManager.LoadScene("WakeUp");
     }
 
 
@@ -42,11 +47,11 @@ public class GameManager : MonoBehaviour
 
     public void WakeUpSuccessfull()
     {
-
+        SceneManager.LoadScene("Result");
     }
 
     public void WakeUpMiss()
     {
-
+        SceneManager.LoadScene("Result");
     }
 }
