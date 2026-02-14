@@ -231,7 +231,7 @@ public class WakeUpManager : MonoBehaviour
     {
         isGameActive = false;
         ResetImagePosition();
-        if (messageText != null) messageText.text = "成功！";
+        if (messageText != null) messageText.text = "おはよう！";
 
         if (GameManager.gameManager != null)
         {
@@ -244,7 +244,7 @@ public class WakeUpManager : MonoBehaviour
     {
         isGameActive = false;
         ResetImagePosition();
-        if (messageText != null) messageText.text = "失敗...";
+        if (messageText != null) messageText.text = "起きれなかった...";
 
         // アニメーション後にGameManagerへ通知
         StartCoroutine(FailAnimationSequence());
