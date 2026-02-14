@@ -48,15 +48,13 @@ public class TypingManager : MonoBehaviour
         {
             ui.SetAlpha(0);
         }
-
-        //後で消す
-        StartCoroutine(GameStart());
+        Time_Image_Change.instance.Timeset(maxTypingTime);
     }
     
     private IEnumerator GameStart()
     {
         float time = 0;
-        //startUI.FadeOutImage(0.3f);
+        startUI.FadeOutImage(0.3f);
         
         for (int i=0; i<6; i++)
         {
@@ -72,7 +70,8 @@ public class TypingManager : MonoBehaviour
             ui.FadeInImage(0.35f);
         }
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(0.1f);
+        
         TypingStart();
     }
 
@@ -101,8 +100,6 @@ public class TypingManager : MonoBehaviour
 
     private void MoveUI()
     {
-        
-
         for (int i=0; i<6; i++)
         {
             if (i == currentImage) //　下に落ちる・フェードアウト・縮小
@@ -156,6 +153,7 @@ public class TypingManager : MonoBehaviour
         if (isTimer)
         {
             typingTime += Time.deltaTime;
+            Time_Image_Change.instance.Clock_Bground_rot(typingTime);
 
             if (typingTime >= maxTypingTime)
             {
