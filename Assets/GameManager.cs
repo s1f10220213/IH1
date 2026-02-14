@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
     public void TypingResult(float type)
     {
         score = type * 3;
+        SceneManager.LoadScene("WakeUp");
     }
 
 
@@ -46,11 +47,11 @@ public class GameManager : MonoBehaviour
 
     public void WakeUpSuccessfull()
     {
-
+        SceneManager.LoadScene("Result");
     }
 
     public void WakeUpMiss()
     {
-
+        SceneManager.LoadScene("Result");
     }
 }
