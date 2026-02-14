@@ -10,8 +10,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] float typingAcuracy;
     [SerializeField] float typingNumber;
 
+    // WakeUpManagerから参照するためのプロパティ
+    public float TypingTime
+    {
+        get { return typingTime; }
+        set { typingTime = value; }
+    }
+
     [Header("WakeUp")]
     public float WakeUpPushNumber;
+
+    // ★追加: 成功か失敗かを保持するBool変数（Resultシーンなどで参照可能）
+    public bool IsWakeUpSuccess;
 
     [Header("Score")]
     [SerializeField] float score;
@@ -45,13 +55,13 @@ public class GameManager : MonoBehaviour
 
     //　WakeUp　/////////////////////////////////////////////////////////
 
-    public void WakeUpSuccessfull()
+    // ★変更: 成功・失敗を引数(bool)で受け取る形に統合
+    public void WakeUpResult(bool isSuccess)
     {
-        SceneManager.LoadScene("Result");
-    }
+        // 結果を保存
+        IsWakeUpSuccess = isSuccess;
 
-    public void WakeUpMiss()
-    {
+        // 結果シーンへ遷移
         SceneManager.LoadScene("Result");
     }
 }

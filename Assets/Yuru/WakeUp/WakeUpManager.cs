@@ -8,7 +8,14 @@ public class WakeUpManager : MonoBehaviour
     [Header("Game Settings")]
     [SerializeField] private float startCountDownTime = 3.0f;
     [SerializeField] private float timeLimit = 5.0f;
+
+    [Header("Difficulty Calculation")]
+    [Tooltip("最低連打回数（基本値）")]
     [SerializeField] private int baseRequiredPushes = 20;
+    [Tooltip("最大連打回数（上限）")]
+    [SerializeField] private int maxRequiredPushes = 60;
+    [Tooltip("typingTime に掛ける定数（倍率）")]
+    [SerializeField] private float timeMultiplier = 2.0f;
 
     [Header("Visuals (Sprite List)")]
     [Tooltip("0番目が寝ている画像、最後が起きている画像になるように登録してください")]
@@ -29,7 +36,7 @@ public class WakeUpManager : MonoBehaviour
     private int currentPushCount = 0;
     private int targetPushCount;
     private bool isGameActive = false;
-    private int currentSpriteIndex = 0; // ★追加: 現在表示している画像の番号を記録
+    private int currentSpriteIndex = 0;
 
     // 揺れ処理用
     private RectTransform imageRectTransform;
@@ -76,7 +83,7 @@ public class WakeUpManager : MonoBehaviour
         {
             currentPushCount++;
 
-            // UI更新（連打数表示のため）
+            // UI更新
             if (counterText != null) counterText.text = $"連打: {currentPushCount} / {targetPushCount}";
 
             ApplyShakeImpulse();
@@ -99,7 +106,6 @@ public class WakeUpManager : MonoBehaviour
         int newIndex = Mathf.FloorToInt(progress * wakeUpSprites.Count);
         newIndex = Mathf.Clamp(newIndex, 0, wakeUpSprites.Count - 1);
 
-        // ★変更: インデックスが変わった時だけ画像を更新し、変数を記録
         if (newIndex != currentSpriteIndex)
         {
             currentSpriteIndex = newIndex;
@@ -161,24 +167,17 @@ public class WakeUpManager : MonoBehaviour
         isGameActive = true;
     }
 
-    // ★追加: 失敗時に画像を順番に戻すアニメーション
     private IEnumerator FailAnimationSequence()
     {
-        // 戻るのにかける合計時間
         float totalDuration = 1.0f;
         int startVal = currentSpriteIndex;
 
-        // すでに0番目（完全に寝ている）でなければアニメーションする
         if (startVal > 0)
         {
-            // 1ステップあたりの待機時間
             float stepTime = totalDuration / startVal;
-
-            // 現在のインデックスの一つ前から 0 まで順番に表示
             for (int i = startVal - 1; i >= 0; i--)
             {
                 yield return new WaitForSeconds(stepTime);
-
                 if (characterImage != null && i < wakeUpSprites.Count)
                 {
                     characterImage.sprite = wakeUpSprites[i];
@@ -187,7 +186,6 @@ public class WakeUpManager : MonoBehaviour
         }
         else
         {
-            // 最初から寝ていた場合は念のため0番目をセットして少し待つ
             if (characterImage != null && wakeUpSprites.Count > 0)
             {
                 characterImage.sprite = wakeUpSprites[0];
@@ -195,32 +193,38 @@ public class WakeUpManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        // アニメーションが終わってからゲームオーバー通知
         if (GameManager.gameManager != null)
         {
-            GameManager.gameManager.WakeUpMiss();
+            // ★変更: 失敗したので false を送る
+            GameManager.gameManager.WakeUpResult(false);
         }
     }
 
     private void SetupDifficulty()
     {
         currentPushCount = 0;
+
         if (GameManager.gameManager != null)
         {
-            targetPushCount = baseRequiredPushes;
+            float tTime = GameManager.gameManager.TypingTime;
+
+            int calculatedPushes = baseRequiredPushes + Mathf.RoundToInt(tTime * timeMultiplier);
+            targetPushCount = Mathf.Clamp(calculatedPushes, baseRequiredPushes, maxRequiredPushes);
+
             GameManager.gameManager.WakeUpPushNumber = targetPushCount;
         }
         else
         {
             targetPushCount = baseRequiredPushes;
         }
+
         UpdateUI();
     }
 
     private void UpdateUI()
     {
         if (timerText != null) timerText.text = $"残り時間: {Mathf.Max(0, currentTime):F1}";
-        // 連打数の更新は入力時に行うようにしたのでここはタイマーのみでも良いが、念のため残す
+        if (counterText != null) counterText.text = $"連打: {currentPushCount} / {targetPushCount}";
     }
 
     private void OnWakeUpSuccess()
@@ -228,17 +232,21 @@ public class WakeUpManager : MonoBehaviour
         isGameActive = false;
         ResetImagePosition();
         if (messageText != null) messageText.text = "成功！";
-        if (GameManager.gameManager != null) GameManager.gameManager.WakeUpSuccessfull();
+
+        if (GameManager.gameManager != null)
+        {
+            // ★変更: 成功したので true を送る
+            GameManager.gameManager.WakeUpResult(true);
+        }
     }
 
     private void OnWakeUpFailed()
     {
-        isGameActive = false; // 操作を受け付けなくする
-        ResetImagePosition(); // 揺れを止める
-
+        isGameActive = false;
+        ResetImagePosition();
         if (messageText != null) messageText.text = "失敗...";
 
-        // ★変更: ここでGameManagerには通知せず、アニメーションを開始する
+        // アニメーション後にGameManagerへ通知
         StartCoroutine(FailAnimationSequence());
     }
 }
