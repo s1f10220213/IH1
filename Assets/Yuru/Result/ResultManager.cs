@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ResultManager : MonoBehaviour
 {
@@ -37,6 +38,14 @@ public class ResultManager : MonoBehaviour
 
         // リザルト演出開始
         StartCoroutine(ResultSequence());
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            SceneManager.LoadScene("TypingScene");
+        }
     }
 
     private IEnumerator ResultSequence()
