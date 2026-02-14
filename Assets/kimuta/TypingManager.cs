@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TypingManager : MonoBehaviour
 {
@@ -96,6 +97,8 @@ public class TypingManager : MonoBehaviour
         currentImage %= 7;
     }
 
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////
+
     void Update()
     {
         if (isTimer)
@@ -110,27 +113,31 @@ public class TypingManager : MonoBehaviour
 
         if (isCanType)
         {
-            if (Input.GetKeyDown(enterKey))
+            var keyboard = Keyboard.current;
+            if (keyboard.anyKey.wasPressedThisFrame)
             {
-                if (key.wasPressedThisFrame && key.displayName == "W")
+                foreach (var key in keyboard.allKeys)
                 {
-                    InputW();
-                }
-                else if(key.wasPressedThisFrame && key.displayName == "A")
-                {
-                    InputA();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "S")
-                {
-                    InputS();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "D")
-                {
-                    InputD();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "Enter")
-                {
-                    InputEnter();
+                    if (key.wasPressedThisFrame && key.displayName == "W")
+                    {
+                        JudgeKey(0);
+                    }
+                    else if(key.wasPressedThisFrame && key.displayName == "A")
+                    {
+                        JudgeKey(1);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "S")
+                    {
+                        JudgeKey(2);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "D")
+                    {
+                        JudgeKey(3);
+                    } 
+                    else if(key.wasPressedThisFrame && key.displayName == "Enter")
+                    {
+                        TypingStop();
+                    }
                 }
             }
         }
@@ -138,6 +145,11 @@ public class TypingManager : MonoBehaviour
 
     ////////////////////////////////////////////////////////////////////////////
      
+    void InputEnter()
+    {
+        
+    }
+    
     void JudgeKey(int keyID) //　キーの正誤判定
     {
         if (currentKeyCode == keyID)
