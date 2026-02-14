@@ -41,10 +41,6 @@ public class TypingManager : MonoBehaviour
 
     void Start()
     {
-        foreach(UIImageBase ui in images)
-        {
-            ui.SetAlpha(0);
-        }
         Time_Image_Change.instance.Timeset(maxTypingTime);
     }
     
@@ -141,8 +137,9 @@ public class TypingManager : MonoBehaviour
             {
                 foreach (var key in keyboard.allKeys)
                 {
-                    if(key.wasPressedThisFrame && key.displayName == "Enter")
+                    if(key.wasPressedThisFrame && key.displayName == "Enter" && !isStart)
                     {
+                        isStart = true;
                         StartCoroutine(GameStart());
                     }
                 }
@@ -156,6 +153,18 @@ public class TypingManager : MonoBehaviour
             if (typingTime >= maxTypingTime)
             {
                 TypingStop();
+            }
+
+            var keyboard = Keyboard.current;
+            if (keyboard.anyKey.wasPressedThisFrame)
+            {
+                foreach (var key in keyboard.allKeys)
+                {
+                    if(key.wasPressedThisFrame && key.displayName == "Enter")
+                    {
+                        TypingStop();
+                    }
+                }
             }
         }
 
@@ -258,6 +267,7 @@ public class TypingManager : MonoBehaviour
 
     void TypingStop()
     {
+        GameManager.gameManager.TypingTime = typingTime;
         isCanType = false;
         isTimer = false;
         siro.FadeInImage(0.5f);
