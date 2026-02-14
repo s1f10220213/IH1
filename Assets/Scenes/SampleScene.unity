@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bcfec8216ca98a4ba53adae01d9dfb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TypingManager
-  key1: 119
+  key1: 273
   key2: 274
   key3: 275
   key4: 276
@@ -473,7 +473,6 @@ MonoBehaviour:
   maxScoreTypeCount: 100
   maxTypingTime: 100
   gameOverMissCount: 100
-  isCanType: 0
   keyCodes: 0000000000000000000000000000000000000000
 --- !u!4 &1772794765
 Transform:

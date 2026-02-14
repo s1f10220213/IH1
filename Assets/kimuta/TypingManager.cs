@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 public class TypingManager : MonoBehaviour
 {
     [Header("TypingSettings")]
@@ -23,15 +23,16 @@ public class TypingManager : MonoBehaviour
 
     ////////////////////////////////////////////////////////////////////////////
 
-    [SerializeField] private bool isCanType;
+    private bool isCanType;
     private bool isTimer;
     [SerializeField] private int[] keyCodes = new int[5];
     private UIImageBase[] images = new UIImageBase[6];
     private int currentKeyCode;
+
     private int currentImage;
 
     ////////////////////////////////////////////////////////////////////////////
-    
+
     void Start()
     {
         for (int i=0; i<5; i++)
@@ -107,11 +108,9 @@ public class TypingManager : MonoBehaviour
             }
         }
 
-        var keyboard = Keyboard.current;
-        if (keyboard.anyKey.wasPressedThisFrame)
+        if (isCanType)
         {
-            // 3. どのキーが押されたか特定したい場合
-            foreach (var key in keyboard.allKeys)
+            if (Input.GetKeyDown(enterKey))
             {
                 if (key.wasPressedThisFrame && key.displayName == "W")
                 {
@@ -132,39 +131,13 @@ public class TypingManager : MonoBehaviour
                 else if(key.wasPressedThisFrame && key.displayName == "Enter")
                 {
                     InputEnter();
-                } 
+                }
             }
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    public void InputW()
-    {
-        if (!isCanType) return;
-        JudgeKey(0);
-    }
-    public void InputA()
-    {
-        if (!isCanType) return;
-        JudgeKey(1);
-    }
-    public void InputS()
-    {
-        if (!isCanType) return;
-        JudgeKey(2);
-    }
-    public void InputD()
-    {
-        if (!isCanType) return;
-        JudgeKey(3);
-    }
-
-    public void InputEnter()
-    {
-        if (!isCanType) return;
-        TypingStop();
-    }
-
+     
     void JudgeKey(int keyID) //　キーの正誤判定
     {
         if (currentKeyCode == keyID)
