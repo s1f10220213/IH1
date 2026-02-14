@@ -17,7 +17,6 @@ public class TypingManager : MonoBehaviour
     [SerializeField] int gameOverMissCount; //　この回数以上のミスでゲームオーバー
 
     [Header("UI")]
-    [SerializeField] UIImageBase imageBase;
     [SerializeField] Sprite spriteW;
     [SerializeField] Sprite spriteA;
     [SerializeField] Sprite spriteS;
@@ -35,8 +34,8 @@ public class TypingManager : MonoBehaviour
     private bool isCanType;
     private bool isTimer;
     private bool isStart;
-    [SerializeField] private int[] keyCodes = new int[5];
-    private UIImageBase[] images = new UIImageBase[6];
+    [SerializeField] private int[] keyCodes = new int[6];
+    [SerializeField] private UIImageBase[] images = new UIImageBase[6];
     private int currentKeyCode;
 
     private int currentImage;
@@ -49,14 +48,17 @@ public class TypingManager : MonoBehaviour
         {
             ui.SetAlpha(0);
         }
+
+        //後で消す
+        StartCoroutine(GameStart());
     }
     
     private IEnumerator GameStart()
     {
         float time = 0;
-        startUI.FadeOutImage(0.3f);
+        //startUI.FadeOutImage(0.3f);
         
-        for (int i=0; i<5; i++)
+        for (int i=0; i<6; i++)
         {
            keyCodes[i] = Random.Range(0, 4);
         }
@@ -76,7 +78,7 @@ public class TypingManager : MonoBehaviour
 
     private void SetUI()
     {
-        for (int i=0; i<5; i++)
+        for (int i=0; i<6; i++)
         {
             if (keyCodes[i] == 0)
             {
@@ -99,29 +101,38 @@ public class TypingManager : MonoBehaviour
 
     private void MoveUI()
     {
+        
+
         for (int i=0; i<6; i++)
         {
             if (i == currentImage) //　下に落ちる・フェードアウト・縮小
             {
                 images[i].MoveDirection(-Vector2.up, 500, 0.04f, UIImageBase.EasingType.EaseOut);
-                //images[i].ScaleToScaleImage(, 0.04);
+                images[i].ScaleToScaleImage(Vector2.one*3f, Vector2.zero, 0.04f);
+                images[i].FadeOutImage(0.04f);
             }
-            else if (i == (currentImage+1)%6) //　右からスライドイン
+            else if (i == (currentImage+5)%6) //　右からスライドイン
             {
-                //images[i].MoveFromTo();
+                images[i].MoveFromTo(new Vector2(1210,340), new Vector2(970,340), 0.04f, UIImageBase.EasingType.EaseOut);
+                images[i].SetScale(Vector2.one*1.8f);
+                images[i].SetAlpha(1);
             }
-            else if (i == (currentImage+5)%6) //　右へ一つ・拡大
+            else if (i == (currentImage+1)%6) //　左へ一つ・拡大
             {
-                images[i].MoveDirection(-Vector2.right, 50, 0.04f, UIImageBase.EasingType.EaseOut);
-                //images[i].ScaleToScaleImage(, 0.04);
+                images[i].MoveDirection(-Vector2.right, 290, 0.04f, UIImageBase.EasingType.EaseOut);
+                images[i].ScaleToScaleImage(Vector2.one*1.8f, Vector2.one*3f, 0.04f);
             }
-            else //　右へ一つずらす
+            else //　左へ一つずらす
             {
-                images[i].MoveDirection(-Vector2.right, 50, 0.04f, UIImageBase.EasingType.EaseOut);
+                images[i].MoveDirection(-Vector2.right, 230, 0.04f, UIImageBase.EasingType.EaseOut);
             }
+
+            
         }
+
         currentImage += 1;
         currentImage %= 6;
+        
     }
 
     /// ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,32 +166,10 @@ public class TypingManager : MonoBehaviour
         if (isCanType)
         {
             var keyboard = Keyboard.current;
-            if (keyboard.anyKey.wasPressedThisFrame)
-            {
-                foreach (var key in keyboard.allKeys)
-                {
-                    if (key.wasPressedThisFrame && key.displayName == "W")
-                    {
-                        JudgeKey(0);
-                    }
-                    else if(key.wasPressedThisFrame && key.displayName == "A")
-                    {
-                        JudgeKey(1);
-                    } 
-                    else if(key.wasPressedThisFrame && key.displayName == "S")
-                    {
-                        JudgeKey(2);
-                    } 
-                    else if(key.wasPressedThisFrame && key.displayName == "D")
-                    {
-                        JudgeKey(3);
-                    } 
-                    else if(key.wasPressedThisFrame && key.displayName == "Enter")
-                    {
-                        TypingStop();
-                    }
-                }
-            }
+            if (keyboard.wKey.wasPressedThisFrame) JudgeKey(0);
+            else if (keyboard.aKey.wasPressedThisFrame) JudgeKey(1);
+            else if (keyboard.sKey.wasPressedThisFrame) JudgeKey(2);
+            else if (keyboard.dKey.wasPressedThisFrame) JudgeKey(3);
         }
     }
 
@@ -217,7 +206,7 @@ public class TypingManager : MonoBehaviour
     void NextKey()
     {
         currentKeyCode = keyCodes[1];
-        for (int i=0; i<4; i++)
+        for (int i=0; i<5; i++)
         {
             keyCodes[i] = keyCodes[i+1];
         }
@@ -226,23 +215,25 @@ public class TypingManager : MonoBehaviour
 
     void GenerateNextKey()
     {
-        keyCodes[4] = Random.Range(0, 4);
+        keyCodes[5] = Random.Range(0, 4);
         if (keyCodes[4] == 0)
         {
-            images[(currentKeyCode+5)%6].SetSprite(spriteW);
+            images[(currentImage+5)%6].SetSprite(spriteW);
         }
         else if (keyCodes[4] == 1)
         {
-            images[(currentKeyCode+5)%6].SetSprite(spriteA);
+            images[(currentImage+5)%6].SetSprite(spriteA);
         }
         else if (keyCodes[4] == 2)
         {
-            images[(currentKeyCode+5)%6].SetSprite(spriteS);
+            images[(currentImage+5)%6].SetSprite(spriteS);
         }
         else if (keyCodes[4] == 3)
         {
-            images[(currentKeyCode+5)%6].SetSprite(spriteD);
+            images[(currentImage+5)%6].SetSprite(spriteD);
         }
+
+
     }
 
     ////////////////////////////////////////////////////////////////////////////
