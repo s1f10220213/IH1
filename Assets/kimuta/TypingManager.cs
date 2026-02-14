@@ -198,6 +198,7 @@ public class TypingManager : MonoBehaviour
 
     void FailType() //　間違い
     {
+        images[currentImage].ShakeImage(20, 0.2f);
         missCount += 1;
     }
 
