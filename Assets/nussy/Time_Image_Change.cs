@@ -16,16 +16,16 @@ public class Time_Image_Change : MonoBehaviour
 
     private int nature;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
          if (instance == null)
         {
-            // ©g‚ğƒCƒ“ƒXƒ^ƒ“ƒX‚Æ‚·‚é
+            // ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½Æ‚ï¿½ï¿½ï¿½
             instance = this;
         }
         else
         {
-            // ƒCƒ“ƒXƒ^ƒ“ƒX‚ª•¡”‘¶İ‚µ‚È‚¢‚æ‚¤‚ÉAŠù‚É‘¶İ‚µ‚Ä‚¢‚½‚ç©g‚ğÁ‹‚·‚é
+            // ï¿½Cï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ‚ï¿½ï¿½È‚ï¿½ï¿½æ‚¤ï¿½ÉAï¿½ï¿½ï¿½É‘ï¿½ï¿½İ‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ç©ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Destroy(gameObject);
         }
          nature = 0;
@@ -38,8 +38,8 @@ public class Time_Image_Change : MonoBehaviour
 
     public void Clock_Bground_rot(float time)
     {
-        //Œv -150~-540
-        //”wŒi 320~510
+        //ï¿½ï¿½ï¿½v -150~-540
+        //ï¿½wï¿½i 320~510
 
         ratio = time / maxTypingTime;
         
@@ -47,7 +47,7 @@ public class Time_Image_Change : MonoBehaviour
         Bground_rot = 190 / ratio;
 
         clock.transform.rotation = Quaternion.Euler(0f, 0f, (-150f - clock_rot));
-        background.transform.rotation = Quaternion.Euler(0f, 0f, (320f+Bground_rot));]
+        background.transform.rotation = Quaternion.Euler(0f, 0f, (320f+Bground_rot));
 
         if((int)time > nature)
         {
