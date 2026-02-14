@@ -17,11 +17,12 @@ public class ResultManager : MonoBehaviour
     [Tooltip("一行に一言ずつ記述したテキストファイルをアタッチしてください")]
     [SerializeField] private TextAsset csvAccepted; // 「採択」時のコメント集
     [SerializeField] private TextAsset csvRejected; // 「不採択」時のコメント集
+    [SerializeField] private TextAsset csvEvaluationImpossible; // ★追加: 「評価不可（失敗）」時のコメント集
 
     [Header("Settings")]
     [SerializeField] private float borderScore = 60.0f; // これ以上なら「採択」、未満なら「不採択」
     [SerializeField] private float stepDelay = 1.0f;    // 各表示の間の待ち時間
-    [SerializeField] private float stampTargetScale = 0.1f; // ★追加: スタンプの目標サイズ
+    [SerializeField] private float stampTargetScale = 0.1f; // スタンプの目標サイズ
 
     private void Start()
     {
@@ -40,26 +41,66 @@ public class ResultManager : MonoBehaviour
 
     private IEnumerator ResultSequence()
     {
-        // 1. スコアの取得（GameManagerが存在しない場合はテスト用に0を入れる）
-        float finalScore = (GameManager.gameManager != null) ? GameManager.gameManager.Score : 0f;
+        // 1. 各種パラメータの取得
+        bool isWakeUpSuccess = true;
+        float finalScore = 0f;
 
-        // 評価判定 (true: 採択, false: 不採択)
-        bool isAccepted = (finalScore >= borderScore);
+        if (GameManager.gameManager != null)
+        {
+            isWakeUpSuccess = GameManager.gameManager.IsWakeUpSuccess;
+            finalScore = GameManager.gameManager.Score;
+        }
+
+        // 2. 状態の判定
+        //  - wakeUpSuccess: 起床成功かどうか
+        //  - isAccepted: 点数がボーダーを超えているか（起床失敗時は強制false）
+        bool isAccepted = false;
+
+        if (isWakeUpSuccess)
+        {
+            // 起床成功時のみ点数判定を行う
+            isAccepted = (finalScore >= borderScore);
+        }
+        else
+        {
+            // 起床失敗時は強制的に不採択扱い
+            isAccepted = false;
+        }
+
 
         yield return new WaitForSeconds(0.5f);
 
         // --- Step 1: スコアテキスト表示 ---
         if (scoreText != null)
         {
-            scoreText.text = $"{finalScore:F0} 点";
+            if (isWakeUpSuccess)
+            {
+                // 成功時は点数を表示
+                scoreText.text = $"{finalScore:F0} 点";
+            }
+            else
+            {
+                // ★変更: 失敗時は「評価不可」を表示
+                scoreText.text = "評価不可";
+            }
         }
         yield return new WaitForSeconds(stepDelay);
 
         // --- Step 2: 上司の一言（CSVからランダム取得） ---
         if (bossCommentText != null)
         {
-            // 判定結果に応じてCSVファイルを選択
-            TextAsset targetCsv = isAccepted ? csvAccepted : csvRejected;
+            TextAsset targetCsv;
+
+            if (!isWakeUpSuccess)
+            {
+                // ★変更: 起床失敗時は「評価不可」用CSVを使用
+                targetCsv = csvEvaluationImpossible;
+            }
+            else
+            {
+                // 起床成功時は点数に応じてCSVを選択
+                targetCsv = isAccepted ? csvAccepted : csvRejected;
+            }
 
             string randomComment = GetRandomCommentFromCSV(targetCsv);
             bossCommentText.text = $"{randomComment}";
@@ -69,29 +110,23 @@ public class ResultManager : MonoBehaviour
         // --- Step 3: スタンプ画像表示 ---
         if (stampImage != null)
         {
-            // 判定結果に応じて画像を選択
-            Sprite selectedSprite = isAccepted ? stampAccepted : stampRejected;
+            Sprite selectedSprite;
+
+            if (!isWakeUpSuccess)
+            {
+                // ★変更: 起床失敗時は「不採択」スタンプを使用
+                selectedSprite = stampRejected;
+            }
+            else
+            {
+                // 起床成功時は判定結果に応じて選択
+                selectedSprite = isAccepted ? stampAccepted : stampRejected;
+            }
 
             if (selectedSprite != null)
             {
                 stampImage.sprite = selectedSprite;
                 stampImage.gameObject.SetActive(true);
-
-                // ポンッと出すアニメーション（スケール変化）
-                // stampImage.transform.localScale = Vector3.zero;
-
-                // float t = 0;
-                // while (t < 1.0f)
-                // {
-                //     t += Time.deltaTime * 5.0f; // アニメーション速度
-
-                //     // 0 から 目標サイズ(0.1) まで補間する
-                //     float scale = Mathf.Lerp(0, stampTargetScale, t);
-
-                //     stampImage.transform.localScale = Vector3.one * scale;
-                //     yield return null;
-                // }
-
                 stampImage.transform.localScale = Vector3.one * stampTargetScale;
             }
         }

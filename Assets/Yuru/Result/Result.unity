@@ -354,6 +354,7 @@ MonoBehaviour:
   typingAcuracy: 0
   typingNumber: 0
   WakeUpPushNumber: 0
+  IsWakeUpSuccess: 0
   score: 0
 --- !u!4 &968032998
 Transform:
@@ -757,6 +758,7 @@ MonoBehaviour:
   stampRejected: {fileID: 21300000, guid: 862d89a0ee6c2b647afacf042026bb74, type: 3}
   csvAccepted: {fileID: 4900000, guid: 663534034a112ff41bd28373d6f462fa, type: 3}
   csvRejected: {fileID: 4900000, guid: 7fbcebfa0f08bd6408d6e86c5c4279b8, type: 3}
+  csvEvaluationImpossible: {fileID: 4900000, guid: a4a8aa1f4da8a6644acfdcb70c9ac808, type: 3}
   borderScore: 70
   stepDelay: 1.8
   stampTargetScale: 0.1

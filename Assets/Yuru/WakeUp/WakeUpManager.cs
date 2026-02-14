@@ -147,7 +147,7 @@ public class WakeUpManager : MonoBehaviour
         isGameActive = false;
         currentTime = timeLimit;
 
-        if (messageText != null) messageText.text = "Ready...";
+        if (messageText != null) messageText.text = "そろそろ起きなきゃ...";
 
         if (characterImage != null && wakeUpSprites.Count > 0)
         {
@@ -163,7 +163,7 @@ public class WakeUpManager : MonoBehaviour
             count--;
         }
 
-        if (messageText != null) messageText.text = "起きろ!!";
+        if (messageText != null) messageText.text = "スペース連打で起きろ!!";
         isGameActive = true;
     }
 
@@ -231,7 +231,7 @@ public class WakeUpManager : MonoBehaviour
     {
         isGameActive = false;
         ResetImagePosition();
-        if (messageText != null) messageText.text = "成功！";
+        if (messageText != null) messageText.text = "おはよう！";
 
         if (GameManager.gameManager != null)
         {
@@ -244,7 +244,7 @@ public class WakeUpManager : MonoBehaviour
     {
         isGameActive = false;
         ResetImagePosition();
-        if (messageText != null) messageText.text = "失敗...";
+        if (messageText != null) messageText.text = "起きれなかった...";
 
         // アニメーション後にGameManagerへ通知
         StartCoroutine(FailAnimationSequence());
