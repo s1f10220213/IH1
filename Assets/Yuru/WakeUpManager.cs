@@ -1,49 +1,87 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // UIを操作するために必要
+using UnityEngine.UI;
 
 public class WakeUpManager : MonoBehaviour
 {
     [Header("Game Settings")]
-    [SerializeField] private float timeLimit = 5.0f; // 制限時間（5秒）
-    [SerializeField] private int baseRequiredPushes = 40; // 基本の必要連打数（仮の固定値）
+    [SerializeField] private float startCountDownTime = 3.0f;
+    [SerializeField] private float timeLimit = 5.0f;
+    [SerializeField] private int baseRequiredPushes = 20;
+
+    [Header("Visuals (Sprite List)")]
+    [Tooltip("0番目が寝ている画像、最後が起きている画像になるように登録してください")]
+    [SerializeField] private List<Sprite> wakeUpSprites = new List<Sprite>();
+    [SerializeField] private Image characterImage;
+
+    [Header("Shake Settings")]
+    [SerializeField] private float shakeMagnitude = 20.0f;
+    [SerializeField] private float shakeRecoverySpeed = 20.0f;
 
     [Header("UI References")]
-    [SerializeField] private Text timerText; // 残り時間を表示するテキスト
-    [SerializeField] private Text counterText; // 連打数を表示するテキスト
-    [SerializeField] private Text messageText; // 成功・失敗を表示するテキスト（オプション）
+    [SerializeField] private Text timerText;
+    [SerializeField] private Text counterText;
+    [SerializeField] private Text messageText;
 
     // 内部変数
     private float currentTime;
     private int currentPushCount = 0;
     private int targetPushCount;
     private bool isGameActive = false;
+    private int currentSpriteIndex = 0; // ★追加: 現在表示している画像の番号を記録
+
+    // 揺れ処理用
+    private RectTransform imageRectTransform;
+    private Vector2 initialPos;
+    private Vector2 currentShakeOffset;
 
     void Start()
     {
-        InitializeWakeUpPhase();
+        if (characterImage != null)
+        {
+            imageRectTransform = characterImage.GetComponent<RectTransform>();
+            if (imageRectTransform != null)
+            {
+                initialPos = imageRectTransform.anchoredPosition;
+            }
+
+            if (wakeUpSprites.Count > 0 && wakeUpSprites[0] != null)
+            {
+                characterImage.sprite = wakeUpSprites[0];
+                currentSpriteIndex = 0; // 初期化
+            }
+        }
+
+        StartCoroutine(GameSequence());
     }
 
     void Update()
     {
         if (!isGameActive) return;
 
-        // タイマー処理
         currentTime -= Time.deltaTime;
         UpdateUI();
 
-        // タイムオーバー判定（失敗）
         if (currentTime <= 0)
         {
             OnWakeUpFailed();
             return;
         }
 
-        // 連打入力処理 (スペースキー)
-        if (Input.GetKeyDown(KeyCode.Space))
+        UpdateShakePosition();
+
+        if ((UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame)
+            || Input.GetKeyDown(KeyCode.Space))
         {
             currentPushCount++;
 
-            // クリア判定（成功）
+            // UI更新（連打数表示のため）
+            if (counterText != null) counterText.text = $"連打: {currentPushCount} / {targetPushCount}";
+
+            ApplyShakeImpulse();
+            UpdateCharacterSprite();
+
             if (currentPushCount >= targetPushCount)
             {
                 OnWakeUpSuccess();
@@ -51,83 +89,156 @@ public class WakeUpManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 朝フェーズの初期化処理
-    /// </summary>
-    private void InitializeWakeUpPhase()
+    private void UpdateCharacterSprite()
     {
-        currentTime = timeLimit;
-        currentPushCount = 0;
-        isGameActive = true;
+        if (characterImage == null) return;
+        if (wakeUpSprites.Count == 0) return;
+        if (targetPushCount == 0) return;
 
-        // --- 難易度の決定ロジック ---
-        // GameManagerが存在する場合、夜フェーズのデータ（typingTime）を取得して難易度に反映可能
-        // 現在は固定値を使用していますが、以下のように計算式を入れることで連携できます。
+        float progress = (float)currentPushCount / targetPushCount;
+        int newIndex = Mathf.FloorToInt(progress * wakeUpSprites.Count);
+        newIndex = Mathf.Clamp(newIndex, 0, wakeUpSprites.Count - 1);
 
-        if (GameManager.gameManager != null)
+        // ★変更: インデックスが変わった時だけ画像を更新し、変数を記録
+        if (newIndex != currentSpriteIndex)
         {
-            // 例: 夜更かし時間(typingTime)が長いほど、必要連打数が増える
-            // targetPushCount = baseRequiredPushes + (int)GameManager.gameManager.typingTime; 
+            currentSpriteIndex = newIndex;
+            if (characterImage.sprite != wakeUpSprites[newIndex])
+            {
+                characterImage.sprite = wakeUpSprites[newIndex];
+            }
+        }
+    }
 
-            // 今回は「固定値」とのことなので、一旦ベース値を代入します
-            targetPushCount = baseRequiredPushes;
+    private void ApplyShakeImpulse()
+    {
+        float x = Random.Range(-1f, 1f) * shakeMagnitude;
+        float y = Random.Range(-1f, 1f) * shakeMagnitude;
+        currentShakeOffset = new Vector2(x, y);
+    }
 
-            // GameManager側の変数にも今の目標値をセット（デバッグや表示用）
-            // GameManager.gameManager.WakeUpPushNumber = targetPushCount;
+    private void UpdateShakePosition()
+    {
+        if (imageRectTransform == null) return;
+
+        if (currentShakeOffset != Vector2.zero)
+        {
+            currentShakeOffset = Vector2.Lerp(currentShakeOffset, Vector2.zero, Time.deltaTime * shakeRecoverySpeed);
+            if (currentShakeOffset.magnitude < 0.1f) currentShakeOffset = Vector2.zero;
+            imageRectTransform.anchoredPosition = initialPos + currentShakeOffset;
+        }
+    }
+
+    private void ResetImagePosition()
+    {
+        currentShakeOffset = Vector2.zero;
+        if (imageRectTransform != null) imageRectTransform.anchoredPosition = initialPos;
+    }
+
+    private IEnumerator GameSequence()
+    {
+        SetupDifficulty();
+        isGameActive = false;
+        currentTime = timeLimit;
+
+        if (messageText != null) messageText.text = "Ready...";
+
+        if (characterImage != null && wakeUpSprites.Count > 0)
+        {
+            characterImage.sprite = wakeUpSprites[0];
+            currentSpriteIndex = 0;
+        }
+
+        float count = startCountDownTime;
+        while (count > 0)
+        {
+            if (timerText != null) timerText.text = $"開始まで: {count:F0}";
+            yield return new WaitForSeconds(1.0f);
+            count--;
+        }
+
+        if (messageText != null) messageText.text = "起きろ!!";
+        isGameActive = true;
+    }
+
+    // ★追加: 失敗時に画像を順番に戻すアニメーション
+    private IEnumerator FailAnimationSequence()
+    {
+        // 戻るのにかける合計時間
+        float totalDuration = 1.0f;
+        int startVal = currentSpriteIndex;
+
+        // すでに0番目（完全に寝ている）でなければアニメーションする
+        if (startVal > 0)
+        {
+            // 1ステップあたりの待機時間
+            float stepTime = totalDuration / startVal;
+
+            // 現在のインデックスの一つ前から 0 まで順番に表示
+            for (int i = startVal - 1; i >= 0; i--)
+            {
+                yield return new WaitForSeconds(stepTime);
+
+                if (characterImage != null && i < wakeUpSprites.Count)
+                {
+                    characterImage.sprite = wakeUpSprites[i];
+                }
+            }
         }
         else
         {
-            // GameManagerがない場合（単体テスト用）
-            targetPushCount = baseRequiredPushes;
-            Debug.LogWarning("GameManagerが見つかりません。単体テストモードで動作します。");
+            // 最初から寝ていた場合は念のため0番目をセットして少し待つ
+            if (characterImage != null && wakeUpSprites.Count > 0)
+            {
+                characterImage.sprite = wakeUpSprites[0];
+            }
+            yield return new WaitForSeconds(0.5f);
         }
 
-        Debug.Log($"朝フェーズ開始！ 目標連打数: {targetPushCount}, 制限時間: {timeLimit}秒");
+        // アニメーションが終わってからゲームオーバー通知
+        if (GameManager.gameManager != null)
+        {
+            GameManager.gameManager.WakeUpMiss();
+        }
+    }
+
+    private void SetupDifficulty()
+    {
+        currentPushCount = 0;
+        if (GameManager.gameManager != null)
+        {
+            targetPushCount = baseRequiredPushes;
+            GameManager.gameManager.WakeUpPushNumber = targetPushCount;
+        }
+        else
+        {
+            targetPushCount = baseRequiredPushes;
+        }
+        UpdateUI();
     }
 
     private void UpdateUI()
     {
-        // UIが設定されている場合のみ更新
-        if (timerText != null)
-        {
-            timerText.text = $"残り時間: {currentTime:F1}"; // 小数点第1位まで表示
-        }
-
-        if (counterText != null)
-        {
-            counterText.text = $"連打: {currentPushCount} / {targetPushCount}";
-        }
+        if (timerText != null) timerText.text = $"残り時間: {Mathf.Max(0, currentTime):F1}";
+        // 連打数の更新は入力時に行うようにしたのでここはタイマーのみでも良いが、念のため残す
     }
 
     private void OnWakeUpSuccess()
     {
         isGameActive = false;
-        currentTime = 0;
-        UpdateUI();
-
-        if (messageText != null) messageText.text = "おはよう！(成功)";
-        Debug.Log("起立成功！");
-
-        // GameManagerに成功を通知
-        if (GameManager.gameManager != null)
-        {
-            GameManager.gameManager.WakeUpSuccessfull();
-        }
+        ResetImagePosition();
+        if (messageText != null) messageText.text = "成功！";
+        if (GameManager.gameManager != null) GameManager.gameManager.WakeUpSuccessfull();
     }
 
     private void OnWakeUpFailed()
     {
-        isGameActive = false;
-        currentTime = 0;
-        UpdateUI();
+        isGameActive = false; // 操作を受け付けなくする
+        ResetImagePosition(); // 揺れを止める
 
-        if (messageText != null) messageText.text = "二度寝... (失敗)";
-        Debug.Log("起立失敗...");
+        if (messageText != null) messageText.text = "失敗...";
 
-        // GameManagerに失敗を通知
-        if (GameManager.gameManager != null)
-        {
-            GameManager.gameManager.WakeUpMiss();
-        }
+        // ★変更: ここでGameManagerには通知せず、アニメーションを開始する
+        StartCoroutine(FailAnimationSequence());
     }
 }

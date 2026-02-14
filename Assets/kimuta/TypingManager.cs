@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 public class TypingManager : MonoBehaviour
 {
     [Header("KeySettings")]
@@ -23,15 +23,13 @@ public class TypingManager : MonoBehaviour
 
     ////////////////////////////////////////////////////////////////////////////
 
-    [SerializeField] private bool isCanType;
+    private bool isCanType;
     private bool isTimer;
     [SerializeField] private int[] keyCodes = new int[5];
     private int currentKeyCode;
 
-    [SerializeField] InputSystem_Actions action;
-
     ////////////////////////////////////////////////////////////////////////////
-    
+
     void Start()
     {
         for (int i=0; i<5; i++)
@@ -50,63 +48,35 @@ public class TypingManager : MonoBehaviour
             typingTime += Time.deltaTime;
         }
 
-        var keyboard = Keyboard.current;
-        if (keyboard.anyKey.wasPressedThisFrame)
+        if (isCanType)
         {
-            // 3. どのキーが押されたか特定したい場合
-            foreach (var key in keyboard.allKeys)
+            if (Input.GetKeyDown(enterKey))
             {
-                if (key.wasPressedThisFrame && key.displayName == "W")
-                {
-                    InputW();
-                }
-                else if(key.wasPressedThisFrame && key.displayName == "A")
-                {
-                    InputA();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "S")
-                {
-                    InputS();
-                } 
-                else if(key.wasPressedThisFrame && key.displayName == "D")
-                {
-                    InputD();
-                } 
+                TypingStop();
+            }
+            else if (Input.GetKeyDown(key1))
+            {
+                JudgeKey(0);
+            }
+            else if (Input.GetKeyDown(key2))
+            {
+                JudgeKey(1);
+            }
+            else if (Input.GetKeyDown(key3))
+            {
+                JudgeKey(2);
+            }
+            else if (Input.GetKeyDown(key4))
+            {
+                JudgeKey(3);
             }
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    public void InputW()
-    {
-        if (!isCanType) return;
-        JudgeKey(0);
-    }
-    public void InputA()
-    {
-        if (!isCanType) return;
-        JudgeKey(1);
-    }
-    public void InputS()
-    {
-        if (!isCanType) return;
-        JudgeKey(2);
-    }
-    public void InputD()
-    {
-        if (!isCanType) return;
-        JudgeKey(3);
-    }
-
-    public void InputEnter()
-    {
-        if (!isCanType) return;
-        TypingStop();
-    }
-
+     
     void JudgeKey(int keyID) //　キーの正誤判定
     {
-        Debug.Log("判定集");
         if (currentKeyCode == keyID)
         {
             SuccessType();
