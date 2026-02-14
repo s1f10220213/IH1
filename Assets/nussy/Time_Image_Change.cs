@@ -47,7 +47,7 @@ public class Time_Image_Change : MonoBehaviour
         //���v -150~-540
         //�w�i 320~510
 
-        ratio = time / maxTypingTime;
+        ratio = time / 13;
         
         clock_rot = 390 * ratio;
         Bground_rot = 190 * ratio;
